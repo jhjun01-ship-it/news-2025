@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>플리츠무드 PRO 글로벌몰 매출 분석</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .chart-container {
+            position: relative;
+            height: 500px;
+            width: 100%;
+        }
+        .small-chart {
+            height: 350px;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .country-flag {
+            width: 24px;
+            height: 18px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <div class="gradient-bg text-white p-6 mb-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">🌏 플리츠무드 PRO 글로벌몰 매출 분석</h1>
+                    <p class="text-blue-100">국가별 매출 현황 및 상세 분석</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-xl font-bold">총 매출액</div>
+                    <div class="text-3xl font-bold">11,527,508원</div>
+                    <div class="text-sm text-blue-200">11개국 합계</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6">
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">최대 매출국</p>
+                        <p class="text-2xl font-bold text-green-600">싱가포르</p>
+                        <p class="text-xs text-gray-500">60.1% 점유</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-crown text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">상위 3개국 비중</p>
+                        <p class="text-2xl font-bold text-blue-600">80.1%</p>
+                        <p class="text-xs text-gray-500">SG + HK + TW</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-chart-pie text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">평균 매출액</p>
+                        <p class="text-2xl font-bold text-purple-600">1,048,410원</p>
+                        <p class="text-xs text-gray-500">국가당 평균</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-calculator text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">진출 국가</p>
+                        <p class="text-2xl font-bold text-orange-600">11개국</p>
+                        <p class="text-xs text-gray-500">아시아-태평양 중심</p>
+                    </div>
+                    <div class="bg-orange-100 p-3 rounded-full">
+                        <i class="fas fa-globe-asia text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- 국가별 매출 비중 파이차트 -->
+            <div class="bg-white p-6 rounded-lg card-shadow">
+                <h3 class="text-xl font-bold mb-4">🥧 국가별 매출 비중</h3>
+                <div class="chart-container">
+                    <canvas id="salesPieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 국가별 매출 막대차트 -->
+            <div class="bg-white p-6 rounded-lg card-shadow">
+                <h3 class="text-xl font-bold mb-4">📊 국가별 매출액 (KRW)</h3>
+                <div class="chart-container">
+                    <canvas id="salesBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 상세 매출 현황 테이블 -->
+        <div class="bg-white p-6 rounded-lg card-shadow mb-8">
+            <h3 class="text-xl font-bold mb-4">📋 국가별 상세 매출 현황</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left">순위</th>
+                            <th class="px-4 py-3 text-left">국가</th>
+                            <th class="px-4 py-3 text-right">매출액 (KRW)</th>
+                            <th class="px-4 py-3 text-right">비중 (%)</th>
+                            <th class="px-4 py-3 text-center">성장 잠재력</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y" id="salesTable">
+                        <!-- 테이블 데이터는 JavaScript로 생성 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 지역별 분석 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- 동남아시아 vs 기타 지역 -->
+            <div class="bg-white p-6 rounded-lg card-shadow">
+                <h3 class="text-xl font-bold mb-4">🌏 지역별 매출 분석</h3>
+                <div class="chart-container small-chart">
+                    <canvas id="regionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 매출 규모별 국가 분류 -->
+            <div class="bg-white p-6 rounded-lg card-shadow">
+                <h3 class="text-xl font-bold mb-4">💰 매출 규모별 분류</h3>
+                <div class="space-y-4">
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-red-800 mb-2">대형 시장 (500만원 이상)</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-red-200 text-red-800 px-3 py-1 rounded-full text-sm">🇸🇬 SG</span>
+                            <span class="bg-red-200 text-red-800 px-3 py-1 rounded-full text-sm">🇭🇰 HK</span>
+                        </div>
+                        <p class="text-xs text-red-600 mt-2">전체 매출의 74.0%</p>
+                    </div>
+
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-yellow-800 mb-2">중형 시장 (50만-500만원)</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm">🇹🇼 TW</span>
+                            <span class="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm">🇲🇾 MY</span>
+                            <span class="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm">🇵🇭 PH</span>
+                            <span class="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm">🇧🇳 BN</span>
+                            <span class="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm">🇳🇿 NZ</span>
+                            <span class="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm">🇹🇭 TH</span>
+                            <span class="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm">🇨🇦 CA</span>
+                        </div>
+                        <p class="text-xs text-yellow-600 mt-2">전체 매출의 24.7%</p>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-blue-800 mb-2">소형 시장 (50만원 미만)</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm">🇦🇺 AU</span>
+                            <span class="bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm">🇰🇷 KR</span>
+                        </div>
+                        <p class="text-xs text-blue-600 mt-2">전체 매출의 2.9%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 인사이트 및 전략 제안 -->
+        <div class="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-6 rounded-lg card-shadow mb-8">
+            <h3 class="text-xl font-bold mb-4">💡 핵심 인사이트 & 전략 제안</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">핵심 발견사항</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start">
+                            <span class="text-yellow-300 mr-2">📈</span>
+                            싱가포르가 압도적 1위 (60.1%, 692만원)
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-yellow-300 mr-2">🎯</span>
+                            상위 3개국이 전체 매출의 80% 차지
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-yellow-300 mr-2">🌏</span>
+                            동남아시아 시장이 핵심 수익원
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-yellow-300 mr-2">💰</span>
+                            한국 시장은 아직 성장 잠재력 존재
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">전략 제안</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start">
+                            <span class="text-green-300 mr-2">🚀</span>
+                            싱가포르 시장 추가 확대 및 심화 전략
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-300 mr-2">📊</span>
+                            홍콩, 대만 시장 성장 동력 분석 필요
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-300 mr-2">🔍</span>
+                            중형 시장(말레이시아, 필리핀) 집중 투자
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-300 mr-2">🎯</span>
+                            한국, 호주 시장 현지화 마케팅 강화
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p>&copy; 2025 플리츠무드 PRO 글로벌몰 매출 분석 대시보드</p>
+        <p class="text-gray-400 text-sm mt-1">실시간 데이터 기반 인사이트 제공</p>
+    </footer>
+
+    <script>
+        // 데이터 정의
+        const countries = ["SG", "HK", "TW", "MY", "PH", "NZ", "AU", "TH", "BN", "CA", "KR"];
+        const salesKRW = [6929235, 1639514, 696629, 639977, 348553, 231273, 185555, 217509, 273323, 221397, 143843];
+        const countryNames = {
+            "SG": "싱가포르", "HK": "홍콩", "TW": "대만", "MY": "말레이시아",
+            "PH": "필리핀", "NZ": "뉴질랜드", "AU": "호주", "TH": "태국",
+            "BN": "브루나이", "CA": "캐나다", "KR": "한국"
+        };
+
+        const flags = {
+            "SG": "🇸🇬", "HK": "🇭🇰", "TW": "🇹🇼", "MY": "🇲🇾",
+            "PH": "🇵🇭", "NZ": "🇳🇿", "AU": "🇦🇺", "TH": "🇹🇭",
+            "BN": "🇧🇳", "CA": "🇨🇦", "KR": "🇰🇷"
+        };
+
+        // 색상 팔레트
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8C471'
+        ];
+
+        const totalSales = salesKRW.reduce((a, b) => a + b, 0);
+
+        // 매출 비중 파이차트
+        const pieCtx = document.getElementById('salesPieChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: countries.map(c => `${flags[c]} ${countryNames[c]}`),
+                datasets: [{
+                    data: salesKRW,
+                    backgroundColor: colors,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = ((context.raw / totalSales) * 100).toFixed(1);
+                                return `${context.label}: ${context.raw.toLocaleString()}원 (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 국가별 매출 막대차트
+        const barCtx = document.getElementById('salesBarChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: countries.map(c => `${flags[c]} ${c}`),
+                datasets: [{
+                    label: '매출액 (KRW)',
+                    data: salesKRW,
+                    backgroundColor: colors,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `매출액: ${context.raw.toLocaleString()}원`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#F3F4F6'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return (value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // 지역별 분석 차트
+        const regionCtx = document.getElementById('regionChart').getContext('2d');
+        const asiaCountries = ['SG', 'HK', 'TW', 'MY', 'PH', 'TH', 'BN'];
+        const othersCountries = ['NZ', 'AU', 'CA', 'KR'];
+
+        const asiaSales = salesKRW.filter((_, i) => asiaCountries.includes(countries[i])).reduce((a, b) => a + b, 0);
+        const othersSales = salesKRW.filter((_, i) => othersCountries.includes(countries[i])).reduce((a, b) => a + b, 0);
+
+        new Chart(regionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['아시아 (7개국)', '기타 지역 (4개국)'],
+                datasets: [{
+                    data: [asiaSales, othersSales],
+                    backgroundColor: ['#FF6B6B', '#4ECDC4'],
+                    borderWidth: 3,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = ((context.raw / totalSales) * 100).toFixed(1);
+                                return `${context.label}: ${context.raw.toLocaleString()}원 (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 테이블 생성
+        function createSalesTable() {
+            const tableData = countries.map((country, index) => ({
+                country: country,
+                name: countryNames[country],
+                flag: flags[country],
+                sales: salesKRW[index],
+                percentage: ((salesKRW[index] / totalSales) * 100)
+            })).sort((a, b) => b.sales - a.sales);
+
+            const tableBody = document.getElementById('salesTable');
+            tableBody.innerHTML = '';
+
+            tableData.forEach((item, index) => {
+                const row = document.createElement('tr');
+                const potential = item.sales > 500000 ? '🔥 높음' : item.sales > 200000 ? '📈 중간' : '💎 잠재력';
+                const potentialColor = item.sales > 500000 ? 'text-red-600' : item.sales > 200000 ? 'text-yellow-600' : 'text-blue-600';
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 font-bold text-gray-700">${index + 1}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center">
+                            <span class="mr-2 text-lg">${item.flag}</span>
+                            <div>
+                                <div class="font-medium">${item.name}</div>
+                                <div class="text-xs text-gray-500">${item.country}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-right font-bold text-green-600">${item.sales.toLocaleString()}원</td>
+                    <td class="px-4 py-3 text-right font-semibold">${item.percentage.toFixed(1)}%</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="text-sm ${potentialColor}">${potential}</span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            createSalesTable();
+
+            // 애니메이션 효과
+            const cards = document.querySelectorAll('.card-shadow');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+
+        // 실시간 업데이트 시뮬레이션
+        setInterval(() => {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ko-KR');
+            document.title = `플리츠무드 PRO 글로벌몰 매출 분석 - ${timeString}`;
+        }, 1000);
+    </script>
+</body>
+</html>
