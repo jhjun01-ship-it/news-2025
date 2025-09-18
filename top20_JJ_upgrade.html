@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe24 PRO 기능개선 요청 관리 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .urgency-alert {
+            background: #fff5f5;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .todo-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .todo-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-left: 5px solid #e74c3c;
+            transition: all 0.3s ease;
+        }
+
+        .todo-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .todo-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .todo-priority {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-high { background: #e74c3c; color: white; }
+        .priority-medium { background: #f39c12; color: white; }
+        .priority-low { background: #27ae60; color: white; }
+
+        .todo-content {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .todo-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border-left: 3px solid #3498db;
+        }
+
+        .todo-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 3px;
+        }
+
+        .btn-operation { background: #3498db; color: white; }
+        .btn-development { background: #f39c12; color: white; }
+        .btn-reject { background: #e74c3c; color: white; }
+        .btn-selected { background: #27ae60; color: white; }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-operation { background: #e3f2fd; color: #1976d2; }
+        .status-development { background: #fff3e0; color: #f57c00; }
+        .status-reject { background: #ffebee; color: #d32f2f; }
+
+        .company-impact {
+            background: #f0f8ff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+            border-left: 3px solid #2196f3;
+            font-size: 12px;
+        }
+
+        .impact-high { border-left-color: #e74c3c; background: #ffeaa7; }
+        .impact-medium { border-left-color: #f39c12; background: #fff9e6; }
+        .impact-low { border-left-color: #27ae60; background: #e8f5e8; }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .filter-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .download-btn {
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .results-board {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .data-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #666;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover {
+            background: #f5f5f5;
+        }
+
+        .pagination button.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .more-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 30px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .more-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .status-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 5px solid;
+        }
+
+        .status-card.operation {
+            border-left-color: #3498db;
+        }
+
+        .status-card.development {
+            border-left-color: #f39c12;
+        }
+
+        .status-card.reject {
+            border-left-color: #e74c3c;
+        }
+
+        .status-number {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .status-number.operation {
+            color: #3498db;
+        }
+
+        .status-number.development {
+            color: #f39c12;
+        }
+
+        .status-number.reject {
+            color: #e74c3c;
+        }
+
+        .status-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #e1e8ed;
+            margin-bottom: 30px;
+        }
+
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .impact-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            text-align: center;
+        }
+
+        .impact-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #e74c3c;
+            margin-bottom: 8px;
+        }
+
+        .impact-label {
+            color: #6c757d;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .timeline-container {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e74c3c;
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 20px;
+            width: 2px;
+            height: calc(100% + 10px);
+            background: #ecf0f1;
+        }
+
+        .timeline-item:last-child::after {
+            display: none;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .timeline-desc {
+            font-size: 14px;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        .timeline-date {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .voc-source {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border-left: 3px solid #3498db;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .customer-quote {
+            font-style: italic;
+            color: #5a6c7d;
+            background: #f8f9fa;
+            padding: 10px;
+            border-left: 3px solid #6c757d;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .todo-section {
+                grid-template-columns: 1fr;
+            }
+            .impact-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 Cafe24 PRO 기능개선 요청</h1>
+            <p>VOC 기반 고객 요구사항 분석 및 TO-DO 관리 대시보드</p>
+        </div>
+
+        <!-- 상태별 요약 카운트 -->
+        <div class="status-summary">
+            <div class="status-card operation">
+                <div class="status-number operation" id="operationCount">0</div>
+                <div class="status-label">운영팀 요청</div>
+            </div>
+            <div class="status-card development">
+                <div class="status-number development" id="developmentCount">0</div>
+                <div class="status-label">개발 진행중</div>
+            </div>
+            <div class="status-card reject">
+                <div class="status-number reject" id="rejectCount">0</div>
+                <div class="status-label">진행안함</div>
+            </div>
+        </div>
+
+        <!-- VOC 기반 기능개선 요청사항 -->
+        <div class="todo-section" id="todoSection">
+            <!-- 동적으로 로드될 카드들 -->
+        </div>
+
+        <!-- 더보기 버튼 -->
+        <button class="more-btn" id="moreBtn" onclick="loadMoreCards()">더보기 (4개 더 보기)</button>
+
+        <!-- 기존 카드들을 숨김 처리 -->
+        <div style="display: none;">
+            <div class="todo-card">
+                <div class="todo-title">
+                    🔥 전담 매니저 배정 시스템
+                </div>
+                <div class="todo-content">
+                    <strong>요청 고객:</strong> 매출 5억+ 15개 고객사<br>
+                    <strong>VOC 근거:</strong> "소통 창구가 너무 많다보니 저희가 조금 헷갈린다. 교통정리를 해달라" (ddalku79)
+                </div>
+                <div class="company-impact impact-high">
+                    💰 <strong>고객 영향력:</strong> 매출 5억+ 대형고객 15개사 | 전체 매출의 35% 차지 | 브랜드 영향력: 높음
+                </div>
+                <div class="todo-details">
+                    <strong>🎯 검토 내용:</strong> 매출 5억+ 고객사 전담 매니저 1:1 배정 시스템<br>
+                    <strong>📋 구현 방안:</strong> 전담 매니저 인력 확충 및 배정 기준 수립<br>
+                    <strong>🔍 검토 필요 사항:</strong> 인력 비용 대비 효과, 매니저 역량 기준 정의
+                </div>
+                <div class="todo-actions">
+                    <button class="action-btn btn-operation" data-type="operation">운영팀 요청</button>
+                    <button class="action-btn btn-development" data-type="development">개발 진행중</button>
+                    <button class="action-btn btn-reject" data-type="reject">진행안함</button>
+                </div>
+            </div>
+
+            <div class="todo-card">
+                <div class="todo-title">
+                    📚 신규 고객 온보딩 프로세스 구축
+                </div>
+                <div class="todo-content">
+                    <strong>VOC 근거:</strong> "뭘해야하는지 몰라서 궁금해 하셨다" (han72401)<br>
+                    <strong>추가 사례:</strong> "설명을 들으니 이해가 가신다" (tmslzjaosldk)
+                </div>
+                <div class="company-impact impact-medium">
+                    📈 <strong>고객 영향력:</strong> 신규 가입 고객 전체 대상 | 월 평균 120개사 신규 가입 | 서비스 정착률 직결
+                </div>
+                <div class="todo-details">
+                    <strong>🎯 검토 내용:</strong> 가입 후 1주일 내 온보딩 콜 및 교육 자료 제공<br>
+                    <strong>📋 구현 방안:</strong> 온보딩 매뉴얼, 동영상 가이드, 초기 설정 지원<br>
+                    <strong>🔍 검토 필요 사항:</strong> 콜센터 인력 투입 범위, 자동화 가능 영역
+                </div>
+                <div class="todo-actions">
+                    <button class="action-btn btn-operation" data-type="operation">운영팀 요청</button>
+                    <button class="action-btn btn-development" data-type="development">개발 진행중</button>
+                    <button class="action-btn btn-reject" data-type="reject">진행안함</button>
+                </div>
+            </div>
+
+            <div class="todo-card">
+                <div class="todo-title">
+                    📊 성과 투명성 개선
+                </div>
+                <div class="todo-content">
+                    <strong>VOC 근거:</strong> "변화를 못 느끼겠다", "뭘 하고 있는지 잘 모르겠다" 25건<br>
+                    <strong>요청 내용:</strong> 구체적인 개선사항 및 성과 가시화
+                </div>
+                <div class="company-impact impact-high">
+                    🔍 <strong>고객 영향력:</strong> 전체 고객사 대상 25건 불만 | 서비스 신뢰도 저하 위험 | 계약 갱신 영향
+                </div>
+                <div class="todo-details">
+                    <strong>🎯 검토 내용:</strong> 월간 성과 리포트 자동 발송 시스템<br>
+                    <strong>📋 구현 방안:</strong> 대시보드 개발, 자동 리포트 생성 및 발송<br>
+                    <strong>🔍 검토 필요 사항:</strong> 리포트 포맷 표준화, 데이터 수집 자동화
+                </div>
+                <div class="todo-actions">
+                    <button class="action-btn btn-operation" data-type="operation">운영팀 요청</button>
+                    <button class="action-btn btn-development" data-type="development">개발 진행중</button>
+                    <button class="action-btn btn-reject" data-type="reject">진행안함</button>
+                </div>
+            </div>
+
+            <div class="todo-card">
+                <div class="todo-title">
+                    💬 고객 응답 속도 개선
+                </div>
+                <div class="todo-content">
+                    <strong>VOC 근거:</strong> "문의 답변이 느리다", "채널톡 답도 느리고" (jungjikmall2)<br>
+                    <strong>현재 상황:</strong> 채널톡 응답 지연 18건 발생
+                </div>
+                <div class="company-impact impact-medium">
+                    ⏰ <strong>고객 영향력:</strong> 전체 고객사 대상 응답 지연 | 18건 불만 접수 | 고객 만족도 저하
+                </div>
+                <div class="todo-details">
+                    <strong>🎯 검토 내용:</strong> 24시간 → 12시간 응답 시간 단축<br>
+                    <strong>📋 구현 방안:</strong> 통합 CRM 시스템 구축, 응답 우선순위 체계<br>
+                    <strong>🔍 검토 필요 사항:</strong> 시스템 통합 비용, 인력 운영 체계 개편
+                </div>
+                <div class="todo-actions">
+                    <button class="action-btn btn-operation" data-type="operation">운영팀 요청</button>
+                    <button class="action-btn btn-development" data-type="development">개발 진행중</button>
+                    <button class="action-btn btn-reject" data-type="reject">진행안함</button>
+                </div>
+            </div>
+
+            <div class="todo-card">
+                <div class="todo-title">
+                    📱 진행상황 실시간 공유
+                </div>
+                <div class="todo-content">
+                    <strong>VOC 근거:</strong> "진행상황을 고객이 알수있도록 공지를 해달라" (odizlo)<br>
+                    <strong>요청 내용:</strong> 서비스 진행 상황 실시간 확인 기능
+                </div>
+                <div class="company-impact impact-low">
+                    📊 <strong>고객 영향력:</strong> 개별 고객 요청 | 투명성 개선 니즈 | 장기적 신뢰도 향상
+                </div>
+                <div class="todo-details">
+                    <strong>🎯 검토 내용:</strong> 고객 전용 진행상황 대시보드 제공<br>
+                    <strong>📋 구현 방안:</strong> 실시간 업데이트 대시보드, 알림 시스템<br>
+                    <strong>🔍 검토 필요 사항:</strong> UI/UX 설계, 실시간 데이터 연동 기술
+                </div>
+                <div class="todo-actions">
+                    <button class="action-btn btn-operation" data-type="operation">운영팀 요청</button>
+                    <button class="action-btn btn-development" data-type="development">개발 진행중</button>
+                    <button class="action-btn btn-reject" data-type="reject">진행안함</button>
+                </div>
+            </div>
+
+            <div class="todo-card">
+                <div class="todo-title">
+                    🎯 매출 규모별 맞춤 서비스
+                </div>
+                <div class="todo-content">
+                    <strong>VOC 근거:</strong> "1:1커스텀이 안되는 부분" (convenii)<br>
+                    <strong>추가 사례:</strong> "범용서비스 고민" (jh0507park)
+                </div>
+                <div class="company-impact impact-high">
+                    🏢 <strong>고객 영향력:</strong> 대형고객 맞춤 서비스 요구 | 계약 조건 협상 이슈 | 경쟁사 이탈 위험
+                </div>
+                <div class="todo-details">
+                    <strong>🎯 검토 내용:</strong> 매출 규모별 차등 서비스 체계 구축<br>
+                    <strong>📋 구현 방안:</strong> 3단계 서비스 등급제, 맞춤형 지원 방안<br>
+                    <strong>🔍 검토 필요 사항:</strong> 서비스 등급 기준, 가격 정책 수립
+                </div>
+                <div class="todo-actions">
+                    <button class="action-btn btn-operation" data-type="operation">운영팀 요청</button>
+                    <button class="action-btn btn-development" data-type="development">개발 진행중</button>
+                    <button class="action-btn btn-reject" data-type="reject">진행안함</button>
+                </div>
+            </div>
+
+            <div class="todo-card">
+                <div class="todo-title">
+                    🤖 개인화 기능 추천 시스템
+                </div>
+                <div class="todo-content">
+                    <strong>성공 사례:</strong> "몰랐던 기능들을 알아서 추천해주고 적용해주어 굉장히 만족함" (whatbaseball1117)<br>
+                    <strong>확장 방향:</strong> 고객별 맞춤 기능 추천 자동화
+                </div>
+                <div class="company-impact impact-low">
+                    🚀 <strong>고객 영향력:</strong> 성공 사례 확장 기회 | 서비스 차별화 포인트 | 고객 활용도 증대
+                </div>
+                <div class="todo-details">
+                    <strong>🎯 검토 내용:</strong> AI 기반 개인화 추천 엔진 개발<br>
+                    <strong>📋 구현 방안:</strong> 머신러닝 모델 구축, 사용 패턴 분석<br>
+                    <strong>🔍 검토 필요 사항:</strong> 데이터 수집 범위, AI 모델 개발 비용
+                </div>
+                <div class="todo-actions">
+                    <button class="action-btn btn-operation" data-type="operation">운영팀 요청</button>
+                    <button class="action-btn btn-development" data-type="development">개발 진행중</button>
+                    <button class="action-btn btn-reject" data-type="reject">진행안함</button>
+                </div>
+            </div>
+
+            <div class="todo-card">
+                <div class="todo-title">
+                    📚 업종별 벤치마킹 자료 제공
+                </div>
+                <div class="todo-content">
+                    <strong>요청 배경:</strong> 유사 업종 성공 사례 벤치마킹 필요<br>
+                    <strong>활용 예:</strong> 패션업계 lemasque 사례를 다른 패션 브랜드에 적용
+                </div>
+                <div class="company-impact impact-low">
+                    📈 <strong>고객 영향력:</strong> 업종별 맞춤 정보 제공 | 고객 성공률 향상 | 부가가치 서비스
+                </div>
+                <div class="todo-details">
+                    <strong>🎯 검토 내용:</strong> 업종별 성공사례 데이터베이스 구축<br>
+                    <strong>📋 구현 방안:</strong> 사례 수집 및 분류, 검색 시스템 개발<br>
+                    <strong>🔍 검토 필요 사항:</strong> 사례 수집 방법론, 정보 보안 정책
+                </div>
+                <div class="todo-actions">
+                    <button class="action-btn btn-operation" data-type="operation">운영팀 요청</button>
+                    <button class="action-btn btn-development" data-type="development">개발 진행중</button>
+                    <button class="action-btn btn-reject" data-type="reject">진행안함</button>
+                </div>
+            </div>
+        </div>
+        <!-- 숨겨진 카드들 끝 -->
+
+        <!-- 필터링 및 액션 섹션 -->
+        <div class="filter-section">
+            <span style="font-weight: 600; color: #333;">📋 상태 필터:</span>
+            <button class="filter-btn active" data-filter="all">전체보기</button>
+            <button class="filter-btn" data-filter="operation">운영팀 요청</button>
+            <button class="filter-btn" data-filter="development">개발 진행중</button>
+            <button class="filter-btn" data-filter="reject">진행안함</button>
+            <button class="download-btn" onclick="downloadData()">📥 데이터 다운로드</button>
+        </div>
+
+        <!-- 필터링된 결과 보드 -->
+        <div class="results-board" id="resultsBoard">
+            <div class="chart-title">📊 필터링된 결과</div>
+            <div class="results-grid" id="resultsGrid">
+            </div>
+        </div>
+
+        <!-- 전체 데이터 테이블 -->
+        <div class="chart-container">
+            <div class="chart-title">📋 전체 기능개선 요청 현황</div>
+            <div class="table-container">
+                <table class="data-table" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>기능명</th>
+                            <th>VOC 근거</th>
+                            <th>고객 영향력</th>
+                            <th>검토 상태</th>
+                            <th>우선순위</th>
+                            <th>Mall ID</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 개선 요청 임팩트 분석 -->
+        <div class="chart-container">
+            <div class="chart-title">📈 기능개선 요청 임팩트 분석</div>
+
+            <div class="impact-grid">
+                <div class="impact-card">
+                    <div class="impact-number">32</div>
+                    <div class="impact-label">소통 개선 요청</div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-number">25</div>
+                    <div class="impact-label">투명성 향상 요구</div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-number">21</div>
+                    <div class="impact-label">서비스 이해도 부족</div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-number">18</div>
+                    <div class="impact-label">응답 속도 개선</div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-number">16</div>
+                    <div class="impact-label">전화 상담 요청</div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-number">14</div>
+                    <div class="impact-label">맞춤형 서비스 요구</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 전체 VOC 리스트 -->
+        <div class="chart-container">
+            <div class="chart-title">📝 전체 VOC 원본 데이터</div>
+            <div class="table-container">
+                <table class="data-table" id="allVocTable">
+                    <thead>
+                        <tr>
+                            <th>Mall ID</th>
+                            <th>VOC 원문</th>
+                            <th>카테고리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allVocTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 전체 기능개선 데이터
+        const todoData = [
+            {
+                id: 1,
+                title: "🔥 전담 매니저 배정 시스템",
+                voc: "소통 창구가 너무 많다보니 저희가 조금 헷갈린다. 교통정리를 해달라 (ddalku79)",
+                impact: "매출 5억+ 대형고객 15개사 | 전체 매출의 35% 차지 | 브랜드 영향력: 높음",
+                priority: "높음",
+                status: "검토중",
+                mallId: "ddalku79",
+                originalVoc: "소통 창구가 너무 많다보니 저희가 조금 헷갈린다. 교통정리를 해달라"
+            },
+            {
+                id: 2,
+                title: "📚 신규 고객 온보딩 프로세스 구축",
+                voc: "뭘해야하는지 몰라서 궁금해 하셨다 (han72401)",
+                impact: "신규 가입 고객 전체 대상 | 월 평균 120개사 신규 가입 | 서비스 정착률 직결",
+                priority: "중간",
+                status: "검토중",
+                mallId: "han72401",
+                originalVoc: "뭘해야하는지 몰라서 궁금해 하셨다"
+            },
+            {
+                id: 3,
+                title: "📊 성과 투명성 개선",
+                voc: "변화를 못 느끼겠다, 뭘 하고 있는지 잘 모르겠다 25건",
+                impact: "전체 고객사 대상 25건 불만 | 서비스 신뢰도 저하 위험 | 계약 갱신 영향",
+                priority: "높음",
+                status: "검토중",
+                mallId: "복수고객",
+                originalVoc: "변화를 못 느끼겠다 / 뭘 하고 있는지 잘 모르겠다"
+            },
+            {
+                id: 4,
+                title: "💬 고객 응답 속도 개선",
+                voc: "문의 답변이 느리다, 채널톡 답도 느리고 (jungjikmall2)",
+                impact: "전체 고객사 대상 응답 지연 | 18건 불만 접수 | 고객 만족도 저하",
+                priority: "중간",
+                status: "검토중",
+                mallId: "jungjikmall2",
+                originalVoc: "문의 답변이 느리다, 채널톡 답도 느리고"
+            },
+            {
+                id: 5,
+                title: "📱 진행상황 실시간 공유",
+                voc: "진행상황을 고객이 알수있도록 공지를 해달라 (odizlo)",
+                impact: "개별 고객 요청 | 투명성 개선 니즈 | 장기적 신뢰도 향상",
+                priority: "낮음",
+                status: "검토중",
+                mallId: "odizlo",
+                originalVoc: "진행상황을 고객이 알수있도록 공지를 해달라"
+            },
+            {
+                id: 6,
+                title: "🎯 매출 규모별 맞춤 서비스",
+                voc: "1:1커스텀이 안되는 부분 (convenii), 범용서비스 고민 (jh0507park)",
+                impact: "대형고객 맞춤 서비스 요구 | 계약 조건 협상 이슈 | 경쟁사 이탈 위험",
+                priority: "높음",
+                status: "검토중",
+                mallId: "convenii, jh0507park",
+                originalVoc: "1:1커스텀이 안되는 부분 / 범용서비스 고민"
+            },
+            {
+                id: 7,
+                title: "🤖 개인화 기능 추천 시스템",
+                voc: "몰랐던 기능들을 알아서 추천해주고 적용해주어 굉장히 만족함 (whatbaseball1117)",
+                impact: "성공 사례 확장 기회 | 서비스 차별화 포인트 | 고객 활용도 증대",
+                priority: "낮음",
+                status: "검토중",
+                mallId: "whatbaseball1117",
+                originalVoc: "몰랐던 기능들을 알아서 추천해주고 적용해주어 굉장히 만족함"
+            },
+            {
+                id: 8,
+                title: "📚 업종별 벤치마킹 자료 제공",
+                voc: "패션업계 lemasque 사례를 다른 패션 브랜드에 적용",
+                impact: "업종별 맞춤 정보 제공 | 고객 성공률 향상 | 부가가치 서비스",
+                priority: "낮음",
+                status: "검토중",
+                mallId: "lemasque",
+                originalVoc: "패션업계 성공 사례 벤치마킹 요청"
+            }
+        ];
+
+        // 전체 VOC 원본 데이터 (실제 데이터를 기반으로 확장)
+        const allVocData = [
+            { mallId: "ddalku79", voc: "소통 창구가 너무 많다보니 저희가 조금 헷갈린다. 교통정리를 해달라", category: "소통개선" },
+            { mallId: "han72401", voc: "뭘해야하는지 몰라서 궁금해 하셨다", category: "온보딩" },
+            { mallId: "tmslzjaosldk", voc: "설명을 들으니 이해가 가신다", category: "온보딩" },
+            { mallId: "복수고객", voc: "변화를 못 느끼겠다", category: "투명성" },
+            { mallId: "복수고객", voc: "뭘 하고 있는지 잘 모르겠다", category: "투명성" },
+            { mallId: "jungjikmall2", voc: "문의 답변이 느리다", category: "응답속도" },
+            { mallId: "jungjikmall2", voc: "채널톡 답도 느리고", category: "응답속도" },
+            { mallId: "odizlo", voc: "진행상황을 고객이 알수있도록 공지를 해달라", category: "투명성" },
+            { mallId: "convenii", voc: "1:1커스텀이 안되는 부분", category: "맞춤서비스" },
+            { mallId: "jh0507park", voc: "범용서비스 고민", category: "맞춤서비스" },
+            { mallId: "whatbaseball1117", voc: "몰랐던 기능들을 알아서 추천해주고 적용해주어 굉장히 만족함", category: "기능추천" },
+            { mallId: "lemasque", voc: "패션업계 성공 사례 벤치마킹 요청", category: "벤치마킹" },
+            { mallId: "test1234", voc: "서비스 설명이 너무 복잡해요", category: "온보딩" },
+            { mallId: "shop5678", voc: "전화상담 요청합니다", category: "소통개선" },
+            { mallId: "mall9999", voc: "진행 현황을 자주 알려주세요", category: "투명성" },
+            { mallId: "store777", voc: "우리 업종에 맞는 서비스가 있나요?", category: "맞춤서비스" },
+            { mallId: "brand888", voc: "경쟁사는 이런 기능이 있던데", category: "기능추천" },
+            { mallId: "fashion123", voc: "다른 패션몰 성공사례 알고 싶어요", category: "벤치마킹" }
+        ];
+
+        // 페이지네이션 변수
+        let currentPage = 0;
+        const itemsPerPage = 4;
+
+        // 카드 로드 함수
+        function loadCards(startIndex, count) {
+            const todoSection = document.getElementById('todoSection');
+            const endIndex = Math.min(startIndex + count, todoData.length);
+
+            for (let i = startIndex; i < endIndex; i++) {
+                const item = todoData[i];
+                const cardHtml = `
+                    <div class="todo-card" data-id="${item.id}">
+                        <div class="todo-title">
+                            ${item.title}
+                        </div>
+                        <div class="todo-content">
+                            <strong>요청 고객:</strong> ${item.mallId}<br>
+                            <strong>VOC 근거:</strong> ${item.voc}
+                        </div>
+                        <div class="company-impact ${getImpactClass(item.priority)}">
+                            💰 <strong>고객 영향력:</strong> ${item.impact}
+                        </div>
+                        <div class="todo-details">
+                            <strong>🎯 검토 내용:</strong> ${getReviewContent(item.title)}<br>
+                            <strong>📋 구현 방안:</strong> ${getImplementationPlan(item.title)}<br>
+                            <strong>🔍 검토 필요 사항:</strong> ${getReviewRequirements(item.title)}
+                        </div>
+                        <div class="todo-actions">
+                            <button class="action-btn btn-operation" data-type="operation">운영팀 요청</button>
+                            <button class="action-btn btn-development" data-type="development">개발 진행중</button>
+                            <button class="action-btn btn-reject" data-type="reject">진행안함</button>
+                        </div>
+                    </div>
+                `;
+                todoSection.innerHTML += cardHtml;
+            }
+
+            // 새로 추가된 버튼들에 이벤트 리스너 추가
+            addActionButtonListeners();
+
+            // 더보기 버튼 상태 업데이트
+            updateMoreButton();
+        }
+
+        // 더보기 버튼 기능
+        function loadMoreCards() {
+            const nextPage = currentPage + 1;
+            const startIndex = nextPage * itemsPerPage;
+
+            if (startIndex < todoData.length) {
+                loadCards(startIndex, itemsPerPage);
+                currentPage = nextPage;
+            }
+        }
+
+        // 더보기 버튼 상태 업데이트
+        function updateMoreButton() {
+            const moreBtn = document.getElementById('moreBtn');
+            const totalLoaded = (currentPage + 1) * itemsPerPage;
+            const remaining = todoData.length - totalLoaded;
+
+            if (remaining > 0) {
+                moreBtn.style.display = 'block';
+                moreBtn.textContent = `더보기 (${Math.min(remaining, itemsPerPage)}개 더 보기)`;
+            } else {
+                moreBtn.style.display = 'none';
+            }
+        }
+
+        // 헬퍼 함수들
+        function getImpactClass(priority) {
+            switch(priority) {
+                case '높음': return 'impact-high';
+                case '중간': return 'impact-medium';
+                case '낮음': return 'impact-low';
+                default: return 'impact-medium';
+            }
+        }
+
+        function getReviewContent(title) {
+            const contentMap = {
+                '🔥 전담 매니저 배정 시스템': '매출 5억+ 고객사 전담 매니저 1:1 배정 시스템',
+                '📚 신규 고객 온보딩 프로세스 구축': '가입 후 1주일 내 온보딩 콜 및 교육 자료 제공',
+                '📊 성과 투명성 개선': '월간 성과 리포트 자동 발송 시스템',
+                '💬 고객 응답 속도 개선': '24시간 → 12시간 응답 시간 단축',
+                '📱 진행상황 실시간 공유': '고객 전용 진행상황 대시보드 제공',
+                '🎯 매출 규모별 맞춤 서비스': '매출 규모별 차등 서비스 체계 구축',
+                '🤖 개인화 기능 추천 시스템': 'AI 기반 개인화 추천 엔진 개발',
+                '📚 업종별 벤치마킹 자료 제공': '업종별 성공사례 데이터베이스 구축'
+            };
+            return contentMap[title] || '검토 내용';
+        }
+
+        function getImplementationPlan(title) {
+            const planMap = {
+                '🔥 전담 매니저 배정 시스템': '전담 매니저 인력 확충 및 배정 기준 수립',
+                '📚 신규 고객 온보딩 프로세스 구축': '온보딩 매뉴얼, 동영상 가이드, 초기 설정 지원',
+                '📊 성과 투명성 개선': '대시보드 개발, 자동 리포트 생성 및 발송',
+                '💬 고객 응답 속도 개선': '통합 CRM 시스템 구축, 응답 우선순위 체계',
+                '📱 진행상황 실시간 공유': '실시간 업데이트 대시보드, 알림 시스템',
+                '🎯 매출 규모별 맞춤 서비스': '3단계 서비스 등급제, 맞춤형 지원 방안',
+                '🤖 개인화 기능 추천 시스템': '머신러닝 모델 구축, 사용 패턴 분석',
+                '📚 업종별 벤치마킹 자료 제공': '사례 수집 및 분류, 검색 시스템 개발'
+            };
+            return planMap[title] || '구현 방안';
+        }
+
+        function getReviewRequirements(title) {
+            const requirementMap = {
+                '🔥 전담 매니저 배정 시스템': '인력 비용 대비 효과, 매니저 역량 기준 정의',
+                '📚 신규 고객 온보딩 프로세스 구축': '콜센터 인력 투입 범위, 자동화 가능 영역',
+                '📊 성과 투명성 개선': '리포트 포맷 표준화, 데이터 수집 자동화',
+                '💬 고객 응답 속도 개선': '시스템 통합 비용, 인력 운영 체계 개편',
+                '📱 진행상황 실시간 공유': 'UI/UX 설계, 실시간 데이터 연동 기술',
+                '🎯 매출 규모별 맞춤 서비스': '서비스 등급 기준, 가격 정책 수립',
+                '🤖 개인화 기능 추천 시스템': '데이터 수집 범위, AI 모델 개발 비용',
+                '📚 업종별 벤치마킹 자료 제공': '사례 수집 방법론, 정보 보안 정책'
+            };
+            return requirementMap[title] || '검토 필요 사항';
+        }
+
+        // 상태 카운트 업데이트
+        function updateStatusCounts() {
+            const operationCount = todoData.filter(item => item.status === '운영팀 요청').length;
+            const developmentCount = todoData.filter(item => item.status === '개발 진행중').length;
+            const rejectCount = todoData.filter(item => item.status === '진행안함').length;
+
+            document.getElementById('operationCount').textContent = operationCount;
+            document.getElementById('developmentCount').textContent = developmentCount;
+            document.getElementById('rejectCount').textContent = rejectCount;
+        }
+
+        // 액션 버튼 이벤트 리스너 추가
+        function addActionButtonListeners() {
+            document.querySelectorAll('.action-btn:not([data-listener])').forEach(btn => {
+                btn.setAttribute('data-listener', 'true');
+                btn.addEventListener('click', function() {
+                    const card = this.closest('.todo-card');
+                    const cardId = parseInt(card.getAttribute('data-id'));
+                    const actionType = this.getAttribute('data-type');
+
+                    // 같은 카드의 다른 버튼들 리셋
+                    card.querySelectorAll('.action-btn').forEach(b => {
+                        b.classList.remove('btn-selected');
+                        b.style.background = '';
+                    });
+
+                    // 선택된 버튼 활성화
+                    this.classList.add('btn-selected');
+
+                    // 데이터 업데이트
+                    const itemIndex = todoData.findIndex(item => item.id === cardId);
+                    if (itemIndex !== -1) {
+                        if (actionType === 'operation') {
+                            todoData[itemIndex].status = '운영팀 요청';
+                        } else if (actionType === 'development') {
+                            todoData[itemIndex].status = '개발 진행중';
+                        } else if (actionType === 'reject') {
+                            todoData[itemIndex].status = '진행안함';
+                        }
+
+                        // 상태 표시 추가
+                        let statusIndicator = card.querySelector('.status-indicator');
+                        if (!statusIndicator) {
+                            statusIndicator = document.createElement('span');
+                            statusIndicator.className = 'status-indicator';
+                            card.querySelector('.todo-title').appendChild(statusIndicator);
+                        }
+
+                        statusIndicator.textContent = todoData[itemIndex].status;
+                        statusIndicator.className = `status-indicator status-${actionType}`;
+
+                        // 카운트 및 테이블 업데이트
+                        updateStatusCounts();
+                        updateTable();
+
+                        // 알림
+                        setTimeout(() => {
+                            alert(`"${card.querySelector('.todo-title').textContent.trim()}"이(가) "${todoData[itemIndex].status}" 상태로 변경되었습니다.`);
+                        }, 100);
+                    }
+                });
+            });
+        }
+
+        // 필터 버튼 처리
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const filter = this.getAttribute('data-filter');
+
+                // 전체보기는 항상 활성화
+                if (filter === 'all') {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    filterResults(filter);
+                    return;
+                }
+
+                // 이미 활성화된 버튼을 다시 클릭하면 해제
+                if (this.classList.contains('active')) {
+                    this.classList.remove('active');
+                    // 전체보기로 되돌리기
+                    document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+                    filterResults('all');
+                } else {
+                    // 다른 필터 버튼들 비활성화
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    filterResults(filter);
+                }
+            });
+        });
+
+        // 필터링 함수
+        function filterResults(filter) {
+            const resultsBoard = document.getElementById('resultsBoard');
+            const resultsGrid = document.getElementById('resultsGrid');
+
+            let filteredData = todoData;
+
+            if (filter !== 'all') {
+                const statusMap = {
+                    'operation': '운영팀 요청',
+                    'development': '개발 진행중',
+                    'reject': '진행안함'
+                };
+
+                filteredData = todoData.filter(item => item.status === statusMap[filter]);
+            }
+
+            // 결과 보드 표시
+            if (filter !== 'all') {
+                resultsBoard.style.display = 'block';
+                resultsGrid.innerHTML = '';
+
+                filteredData.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
+                        <h4>${item.title}</h4>
+                        <p><strong>VOC:</strong> ${item.voc}</p>
+                        <p><strong>영향력:</strong> ${item.impact}</p>
+                        <p><strong>상태:</strong> <span style="font-weight: 600; color: #e74c3c; cursor: pointer;" onclick="removeFromFilter(${item.id})">${item.status} ❌</span></p>
+                    `;
+                    resultsGrid.appendChild(card);
+                });
+
+                // 결과 개수 표시
+                const title = resultsBoard.querySelector('.chart-title');
+                title.textContent = `📊 필터링된 결과 (${filteredData.length}개)`;
+            } else {
+                resultsBoard.style.display = 'none';
+            }
+        }
+
+        // 필터에서 항목 제거 함수
+        function removeFromFilter(itemId) {
+            const itemIndex = todoData.findIndex(item => item.id === itemId);
+            if (itemIndex !== -1) {
+                // 상태를 검토중으로 되돌리기
+                todoData[itemIndex].status = '검토중';
+
+                // 해당 카드 찾기 (현재 로드된 카드들 중에서)
+                const card = document.querySelector(`[data-id="${itemId}"]`);
+                if (card) {
+                    card.querySelectorAll('.action-btn').forEach(b => {
+                        b.classList.remove('btn-selected');
+                        b.style.background = '';
+                    });
+
+                    // 상태 표시 제거
+                    const statusIndicator = card.querySelector('.status-indicator');
+                    if (statusIndicator) {
+                        statusIndicator.remove();
+                    }
+                }
+
+                // 현재 활성화된 필터 다시 적용
+                const activeFilter = document.querySelector('.filter-btn.active');
+                if (activeFilter) {
+                    filterResults(activeFilter.getAttribute('data-filter'));
+                }
+
+                // 카운트 및 테이블 업데이트
+                updateStatusCounts();
+                updateTable();
+
+                alert(`"${todoData[itemIndex].title}" 항목이 필터에서 제거되고 검토중 상태로 되돌려졌습니다.`);
+            }
+        }
+
+        // 기능개선 테이블 업데이트 함수
+        function updateTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            todoData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.title}</td>
+                    <td style="max-width: 200px; word-wrap: break-word;">${item.voc}</td>
+                    <td style="max-width: 200px; word-wrap: break-word;">${item.impact}</td>
+                    <td><span style="font-weight: 600; color: ${getStatusColor(item.status)};">${item.status}</span></td>
+                    <td>${item.priority}</td>
+                    <td>${item.mallId}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 전체 VOC 테이블 업데이트 함수
+        function updateAllVocTable() {
+            const allVocTableBody = document.getElementById('allVocTableBody');
+            allVocTableBody.innerHTML = '';
+
+            allVocData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.mallId}</td>
+                    <td style="max-width: 300px; word-wrap: break-word;">${item.voc}</td>
+                    <td>${item.category}</td>
+                `;
+                allVocTableBody.appendChild(row);
+            });
+        }
+
+        // 상태별 색상 함수
+        function getStatusColor(status) {
+            switch(status) {
+                case '운영팀 요청': return '#1976d2';
+                case '개발 진행중': return '#f57c00';
+                case '진행안함': return '#d32f2f';
+                default: return '#666';
+            }
+        }
+
+        // 데이터 다운로드 함수
+        function downloadData() {
+            const csvContent = "data:text/csv;charset=utf-8," +
+                "기능명,VOC 근거,고객 영향력,검토 상태,우선순위,Mall ID,VOC 원문\n" +
+                todoData.map(item =>
+                    `"${item.title}","${item.voc}","${item.impact}","${item.status}","${item.priority}","${item.mallId}","${item.originalVoc}"`
+                ).join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `기능개선요청_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            alert('기능개선 요청 CSV 파일이 다운로드되었습니다.');
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            // 첫 4개 카드 로드
+            loadCards(0, itemsPerPage);
+
+            // 테이블 초기화
+            updateTable();
+            updateAllVocTable();
+
+            // 상태 카운트 초기화
+            updateStatusCounts();
+        });
+    </script>
+</body>
+</html>
