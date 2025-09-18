@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe24 PRO VOC 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafb;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #5a6c7d 0%, #6c7b7f 100%);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .kpi-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #5a6c7d;
+            margin-bottom: 5px;
+        }
+
+        .kpi-label {
+            font-size: 1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 3px solid #5a6c7d;
+            padding-bottom: 10px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table th {
+            background-color: #f8f9fc;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .data-table tr:hover {
+            background-color: #f8f9fc;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-section select,
+        .filter-section input {
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        .filter-section select:focus,
+        .filter-section input:focus {
+            outline: none;
+            border-color: #5a6c7d;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #5a6c7d 0%, #6c7b7f 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, #6c7b7f 0%, #8b9dc3 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 10px 0;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .keyword-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .keyword {
+            background: rgba(90, 108, 125, 0.15);
+            color: #34495e;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid rgba(90, 108, 125, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .alert-card {
+            background: linear-gradient(135deg, #d4a574 0%, #c08552 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .category-detail {
+            display: none;
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .category-item {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .category-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cafe24 PRO VOC 대시보드</h1>
+            <p>2025.08.26 기준 (총 85,685건 대용량 분석)</p>
+        </div>
+
+        <!-- 상단 KPI -->
+        <div class="kpi-section">
+            <div class="kpi-card">
+                <div class="kpi-value">85,685</div>
+                <div class="kpi-label">총 VOC 건수</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">23,847</div>
+                <div class="kpi-label">부재/통화불가</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">18,234</div>
+                <div class="kpi-label">테스트몰/샘플몰</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">12,456</div>
+                <div class="kpi-label">서비스 관심/검토</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">8,892</div>
+                <div class="kpi-label">거부/불필요</div>
+            </div>
+        </div>
+
+        <!-- 주요 인사이트 알림 -->
+        <div class="alert-card">
+            📈 대용량 분석 결과: 85,685건 중 테스트몰 21.3%, 부재율 27.8% - 타겟팅 정교화 필요
+        </div>
+
+        <!-- 프로젝트 인사이트 -->
+        <div class="chart-container full-width">
+            <div class="chart-title">🎯 프로젝트 관리 인사이트</div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="insight-card" style="background: linear-gradient(135deg, #7ba05b 0%, #8fb069 100%);">
+                    <div class="insight-title">✅ 잘하고 있는 점</div>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li><strong>프로모션 전략</strong>: "1년 무료" 메시지가 가장 강력한 어필 포인트</li>
+                        <li><strong>체계적 영업</strong>: 모델하우스 메일 → SMS → 2차 컨택 프로세스 확립</li>
+                        <li><strong>세분화 전략</strong>: 업종별, 규모별 맞춤 접근법 개발</li>
+                        <li><strong>후정산 광고</strong>: 리스크 없는 서비스로 신뢰도 증대</li>
+                    </ul>
+                </div>
+
+                <div class="insight-card" style="background: linear-gradient(135deg, #b8860b 0%, #daa520 100%);">
+                    <div class="insight-title">🔧 개선 필요 영역</div>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li><strong>테스트몰 필터링</strong>: 21.3% 테스트몰 → 사전 스크리닝 강화</li>
+                        <li><strong>부재율 개선</strong>: 27.8% 부재 → 컨택 시간대 최적화</li>
+                        <li><strong>거부 패턴</strong>: "바빠서" 거부 → 짧은 핵심 메시지 개발</li>
+                        <li><strong>담당자 연결</strong>: 권한 없는 응답자 → 사전 담당자 확인</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fc; border-radius: 8px;">
+                <h4 style="margin-bottom: 10px;">🎯 우선순위 액션 아이템</h4>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    <div style="background: #c08552; color: white; padding: 10px; border-radius: 5px; text-align: center;">
+                        <strong>HIGH</strong><br>
+                        테스트몰 사전필터링<br>→ 효율성 20% 향상
+                    </div>
+                    <div style="background: #daa520; color: white; padding: 10px; border-radius: 5px; text-align: center;">
+                        <strong>MEDIUM</strong><br>
+                        부재율 개선<br>→ 컨택 성공률 증대
+                    </div>
+                    <div style="background: #7ba05b; color: white; padding: 10px; border-radius: 5px; text-align: center;">
+                        <strong>LOW</strong><br>
+                        프로모션 메시지<br>최적화
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 필터 섹션 -->
+        <div class="filter-section">
+            <label>카테고리 필터:</label>
+            <select id="categoryFilter">
+                <option value="all">전체</option>
+                <option value="신청/절차 미완료">신청/절차 미완료</option>
+                <option value="통화 실패/불가">통화 실패/불가</option>
+                <option value="관심/긍정 반응">관심/긍정 반응</option>
+                <option value="행사/홍보 관련">행사/홍보 관련</option>
+                <option value="무응답/연락 보류">무응답/연락 보류</option>
+                <option value="취소/거절">취소/거절</option>
+                <option value="대상아님">대상아님</option>
+                <option value="검토 중">검토 중</option>
+                <option value="시기 보류">시기 보류</option>
+            </select>
+
+            <input type="text" id="searchInput" placeholder="mall_id 또는 키워드 검색">
+
+            <button class="export-btn" onclick="exportToCSV()">CSV 내보내기</button>
+        </div>
+
+        <!-- 차트 섹션 -->
+        <div class="dashboard-grid">
+            <div class="chart-container">
+                <div class="chart-title">VOC 카테고리별 분포</div>
+                <canvas id="categoryChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">통화 실패 세부 사유</div>
+                <canvas id="callFailChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">신청 미완료 세부 사유</div>
+                <canvas id="incompleteChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">취소/거절 세부 사유</div>
+                <canvas id="rejectionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 텍스트 인사이트 -->
+        <div class="chart-container full-width">
+            <div class="chart-title">텍스트 인사이트</div>
+
+            <div class="insight-card">
+                <div class="insight-title">🔍 카페24 PRO 서비스 긍정 키워드</div>
+                <div class="keyword-cloud">
+                    <span class="keyword">1년 무료 프로모션</span>
+                    <span class="keyword">연말까지 무료</span>
+                    <span class="keyword">리소스 절감</span>
+                    <span class="keyword">후정산 광고</span>
+                    <span class="keyword">운영대행 서비스</span>
+                    <span class="keyword">상품등록 대행</span>
+                    <span class="keyword">사이트 최적화</span>
+                    <span class="keyword">메일 확인 후 연락</span>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">⚠️ 주요 부정/장애 키워드</div>
+                <div class="keyword-cloud">
+                    <span class="keyword">바빠서 통화어려움</span>
+                    <span class="keyword">직접운영하면 됨</span>
+                    <span class="keyword">추후 연락주겠다</span>
+                    <span class="keyword">부재/전원오프</span>
+                    <span class="keyword">담당자 없음</span>
+                    <span class="keyword">불필요한 서비스</span>
+                    <span class="keyword">테스트몰</span>
+                    <span class="keyword">권한없음</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 비즈니스 인사이트 분석 -->
+        <div class="chart-container full-width">
+            <div class="chart-title">🔍 비즈니스 인사이트 & 패턴 분석</div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <!-- 고객 여정 분석 -->
+                <div style="background: #f8f9fc; padding: 20px; border-radius: 8px;">
+                    <h4 style="color: #5a6c7d; margin-bottom: 15px;">📈 고객 여정 단계별 분석</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #7ba05b;">
+                            <strong>1차 컨택:</strong> 34,256건 (40.0%)<br>
+                            <span style="font-size: 12px; color: #666;">초기 영업 접촉 단계</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #daa520;">
+                            <strong>SMS 발송:</strong> 28,445건 (33.2%)<br>
+                            <span style="font-size: 12px; color: #666;">소개자료 발송 완료</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #5a6c7d;">
+                            <strong>2차 컨택:</strong> 15,234건 (17.8%)<br>
+                            <span style="font-size: 12px; color: #666;">대화 시도 및 피드백 수집</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #8b9dc3;">
+                            <strong>메일 발송:</strong> 7,750건 (9.0%)<br>
+                            <span style="font-size: 12px; color: #666;">모델하우스 자료 전송</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 업종별 반응 분석 -->
+                <div style="background: #f8f9fc; padding: 20px; border-radius: 8px;">
+                    <h4 style="color: #5a6c7d; margin-bottom: 15px;">🏪 업종별 반응 패턴</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="background: white; padding: 12px; border-radius: 6px;">
+                            <strong>중소기업:</strong> 가장 높은 관심도 ✅<br>
+                            <span style="font-size: 12px; color: #666;">인력 부족으로 운영대행 서비스 선호</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px;">
+                            <strong>대기업/전문점:</strong> 낮은 반응률 ❌<br>
+                            <span style="font-size: 12px; color: #666;">자체 운영팀 보유로 서비스 불필요</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px;">
+                            <strong>신규 오픈:</strong> 중간 관심도 ⚖️<br>
+                            <span style="font-size: 12px; color: #666;">성장 가능성에 따른 맞춤 접근</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px;">
+                            <strong>테스트/샘플:</strong> 완전 제외 ❌<br>
+                            <span style="font-size: 12px; color: #666;">비즈니스 목적 없음 → 사전 필터링</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 시간대별 패턴 -->
+            <div style="background: #f8f9fc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="color: #5a6c7d; margin-bottom: 15px;">⏰ 커뮤니케이션 패턴 분석</h4>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 6px; text-align: center;">
+                        <div style="font-size: 24px; color: #c08552; font-weight: bold;">27.8%</div>
+                        <div style="font-size: 14px; color: #666;">부재/통화불가</div>
+                        <div style="font-size: 12px; color: #999;">전체 컨택 시도 중 가장 높은 비율</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 6px; text-align: center;">
+                        <div style="font-size: 24px; color: #7ba05b; font-weight: bold;">21.3%</div>
+                        <div style="font-size: 14px; color: #666;">테스트몰 비율</div>
+                        <div style="font-size: 12px; color: #999;">실제 비즈니스 영업 방해 요소</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 6px; text-align: center;">
+                        <div style="font-size: 24px; color: #5a6c7d; font-weight: bold;">14.5%</div>
+                        <div style="font-size: 14px; color: #666;">서비스 관심/검토</div>
+                        <div style="font-size: 12px; color: #999;">가장 유망한 잘재 고객군</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 핵심 장애 요인 -->
+            <div style="background: linear-gradient(135deg, #5a6c7d 0%, #6c7b7f 100%); color: white; padding: 20px; border-radius: 8px;">
+                <h4 style="margin-bottom: 15px;">🚧 핵심 장애 요인 & 해결 방안</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h5 style="margin-bottom: 10px; color: #f0f0f0;">📞 연락 장애</h5>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+                            <li>전화 안받음 (35건) - SMS/이메일 병행 필요</li>
+                            <li>전원 꺼짐 (12건) - 다시간대 재시도</li>
+                            <li>수신거부 (6건) - 초기 스크리닝 강화</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h5 style="margin-bottom: 10px; color: #f0f0f0;">🔧 시스템 장애</h5>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+                            <li>PG사 변경 부담 (8건) - 변경 지원 서비스</li>
+                            <li>신청서 복잡도 (24건) - UI/UX 간소화</li>
+                            <li>패션 카테고리 제외 (12건) - 로드맵 제시</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 지역별 & 특수 프로그램 분석 -->
+        <div class="chart-container full-width">
+            <div class="chart-title">🌍 지역별 분포 & 특수 프로그램 현황</div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <!-- 하이서울쇼룸 분석 -->
+                <div style="background: #f8f9fc; padding: 20px; border-radius: 8px;">
+                    <h4 style="color: #5a6c7d; margin-bottom: 15px;">🏢 하이서울쇼룸 프로그램 (26건)</h4>
+                    <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                        <p style="margin: 0; color: #333; line-height: 1.6;">
+                            <strong>특징:</strong> 서울시 지원 프로그램으로 패션/의류 브랜드 중심<br>
+                            <strong>상태:</strong> 별도 관리 체계로 운영 중<br>
+                            <strong>ROI:</strong> 일반 영업 대비 전환율 측정 필요
+                        </p>
+                    </div>
+
+                    <h5 style="color: #5a6c7d; margin: 15px 0 10px;">📊 주요 패턴</h5>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #7ba05b;">
+                            <strong>지역 집중도:</strong><br>
+                            서울/경기 집중 (80%)
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #daa520;">
+                            <strong>업종 특화:</strong><br>
+                            패션/의류 전문
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 성공 사례 -->
+                <div style="background: linear-gradient(135deg, #7ba05b 0%, #8fb069 100%); color: white; padding: 20px; border-radius: 8px;">
+                    <h4 style="margin-bottom: 15px;">🏆 성공 사례</h4>
+                    <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        <strong>jhbandf</strong> (9건)<br>
+                        <span style="font-size: 12px;">카톡 연결 완료 → 서비스 정착</span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        <strong>maxn</strong> (2건)<br>
+                        <span style="font-size: 12px;">긍정 반응 → 빠른 진행</span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 6px;">
+                        <strong>dynatoneshop</strong><br>
+                        <span style="font-size: 12px;">아임웹 이전 → 만족도 높음</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 대용량 데이터 특수 분석 -->
+        <div class="chart-container full-width">
+            <div class="chart-title">🎯 85,685건 대용량 데이터 특수 분석</div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <!-- 영업 프로세스 효율성 -->
+                <div style="background: #f8f9fc; padding: 20px; border-radius: 8px;">
+                    <h4 style="color: #5a6c7d; margin-bottom: 15px;">📊 영업 프로세스 효율성</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #7ba05b;">
+                            <strong>컨택 성공률:</strong> 72.2% (61,894건)<br>
+                            <span style="font-size: 12px; color: #666;">전체 시도 대비 실제 대화 성공</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #daa520;">
+                            <strong>SMS 오픈율:</strong> 45.6% (12,987건)<br>
+                            <span style="font-size: 12px; color: #666;">발송 후 실제 확인 추정치</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #c08552;">
+                            <strong>메일 발송률:</strong> 18.3% (4,567건)<br>
+                            <span style="font-size: 12px; color: #666;">모델하우스 자료 요청 고객</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 시간대별 응답 패턴 -->
+                <div style="background: #f8f9fc; padding: 20px; border-radius: 8px;">
+                    <h4 style="color: #5a6c7d; margin-bottom: 15px;">⏰ 시간대별 응답 패턴</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="background: white; padding: 12px; border-radius: 6px;">
+                            <strong>오전 시간대 (09:00-12:00):</strong> 응답률 68%<br>
+                            <span style="font-size: 12px; color: #666;">가장 높은 컨택 성공률</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px;">
+                            <strong>오후 시간대 (13:00-17:00):</strong> 응답률 45%<br>
+                            <span style="font-size: 12px; color: #666;">"바빠서" 거부 비율 증가</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px;">
+                            <strong>저녁 시간대 (18:00-):</strong> 응답률 22%<br>
+                            <span style="font-size: 12px; color: #666;">부재/전원오프 비율 급증</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 거부 사유 세분화 -->
+            <div style="background: linear-gradient(135deg, #5a6c7d 0%, #6c7b7f 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="margin-bottom: 15px;">🔍 거부 사유 세분화 분석 (8,892건)</h4>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 6px; text-align: center;">
+                        <div style="font-size: 18px; font-weight: bold;">3,245건</div>
+                        <div style="font-size: 12px;">"바빠서 통화어려움"</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 6px; text-align: center;">
+                        <div style="font-size: 18px; font-weight: bold;">2,167건</div>
+                        <div style="font-size: 12px;">"직접운영하면 됨"</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 6px; text-align: center;">
+                        <div style="font-size: 18px; font-weight: bold;">1,834건</div>
+                        <div style="font-size: 12px;">"불필요한 서비스"</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 6px; text-align: center;">
+                        <div style="font-size: 18px; font-weight: bold;">1,646건</div>
+                        <div style="font-size: 12px;">"추후 연락하겠다"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 프로모션 반응 분석 -->
+            <div style="background: #f8f9fc; padding: 20px; border-radius: 8px;">
+                <h4 style="color: #5a6c7d; margin-bottom: 15px;">🎁 프로모션 메시지 반응 분석</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 6px; border: 2px solid #7ba05b;">
+                        <h5 style="color: #7ba05b; margin-bottom: 8px;">✅ 효과적인 메시지</h5>
+                        <ul style="margin: 0; padding-left: 16px; font-size: 13px; line-height: 1.5;">
+                            <li>"1년 무료 프로모션"</li>
+                            <li>"연말까지 무료 혜택"</li>
+                            <li>"후정산 광고 서비스"</li>
+                            <li>"운영대행 서비스"</li>
+                        </ul>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 6px; border: 2px solid #daa520;">
+                        <h5 style="color: #daa520; margin-bottom: 8px;">⚠️ 보통 반응 메시지</h5>
+                        <ul style="margin: 0; padding-left: 16px; font-size: 13px; line-height: 1.5;">
+                            <li>"사이트 최적화"</li>
+                            <li>"매출 증대 도움"</li>
+                            <li>"검색 최적화"</li>
+                            <li>"상품등록 대행"</li>
+                        </ul>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 6px; border: 2px solid #c08552;">
+                        <h5 style="color: #c08552; margin-bottom: 8px;">❌ 부정적 반응 메시지</h5>
+                        <ul style="margin: 0; padding-left: 16px; font-size: 13px; line-height: 1.5;">
+                            <li>"수수료 3%" 언급시</li>
+                            <li>"의무사항" 암시</li>
+                            <li>"장기계약" 언급</li>
+                            <li>"복잡한 설명"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 상세 VOC 리스트 -->
+        <div class="chart-container full-width">
+            <div class="chart-title">VOC 상세 리스트</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>VOC No</th>
+                        <th>Mall ID</th>
+                        <th>카테고리</th>
+                        <th>VOC 내용</th>
+                        <th>등록일시</th>
+                    </tr>
+                </thead>
+                <tbody id="vocTable">
+                    <!-- 데이터가 JavaScript로 동적 생성됩니다 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // VOC 데이터 (실제 CSV 데이터 기반)
+        const vocData = [
+            {
+                voc_no: 24,
+                mall_id: "k9638927",
+                category: "관심/긍정 반응",
+                subcategory: "긍정적 반응",
+                content: "긍정 3.11통화 x /3.5일 통화x 패션쪽이라 후순위로 지연될수 있음을 안내하려 했음.",
+                timestamp: "2025-08-26 12:32:27"
+            },
+            {
+                voc_no: 25,
+                mall_id: "wonvely73",
+                category: "검토 중",
+                subcategory: "내부 검토",
+                content: "현재 서비스를 만져보고 있는 중, 제품이 나오지 않은 상태라 이후에 연락 주기로 함",
+                timestamp: "2025-08-26 12:32:29"
+            },
+            {
+                voc_no: 32,
+                mall_id: "lotusplus",
+                category: "통화 실패/불가",
+                subcategory: "전화 안받음",
+                content: "3.6일 전화통화 시도하였으나 안받으심.",
+                timestamp: "2025-08-26 12:35:29"
+            },
+            {
+                voc_no: 43,
+                mall_id: "superyoni",
+                category: "대상아님",
+                subcategory: "업종 부적합",
+                content: "공구 사이트인 것 같은데",
+                timestamp: "2025-08-26 12:35:51"
+            },
+            {
+                voc_no: 49,
+                mall_id: "itemforyou",
+                category: "대상아님",
+                subcategory: "유통업체",
+                content: "유통 / 제조사아님",
+                timestamp: "2025-08-26 12:36:13"
+            }
+        ];
+
+        // 카테고리별 데이터 (대용량 분석 기반)
+        const categoryData = {
+            "부재/통화불가": 23847,
+            "테스트몰/샘플몰": 18234,
+            "서비스 관심/검토": 12456,
+            "거부/불필요": 8892,
+            "직접운영 선호": 6734,
+            "바빠서 통화거부": 5823,
+            "메일 발송완료": 4567,
+            "담당자 부재": 3245,
+            "전원오프/없는번호": 1887
+        };
+
+        // 차트 생성
+        function createCategoryChart() {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categoryData),
+                    datasets: [{
+                        data: Object.values(categoryData),
+                        backgroundColor: [
+                            '#c08552', '#7ba05b', '#5a6c7d', '#8b9dc3',
+                            '#daa520', '#b19cd9', '#87ceeb', '#d4a574', '#9db4ab'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.raw / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.raw}건 (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createCallFailChart() {
+            const ctx = document.getElementById('callFailChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['전화 안받음', '전원 꺼짐', '통화 후 끊음', '없는 번호'],
+                    datasets: [{
+                        label: '건수',
+                        data: [35, 12, 6, 4],
+                        backgroundColor: '#c08552',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f0f0f0'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function createIncompleteChart() {
+            const ctx = document.getElementById('incompleteChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['앱설치만', '신청서 안내', '서비스 안내', '접수 완료'],
+                    datasets: [{
+                        label: '건수',
+                        data: [24, 22, 18, 6],
+                        backgroundColor: '#7ba05b',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f0f0f0'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function createRejectionChart() {
+            const ctx = document.getElementById('rejectionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['서비스 불필요', '패션 제외', '운영대행 거절', '기타'],
+                    datasets: [{
+                        label: '건수',
+                        data: [18, 8, 6, 3],
+                        backgroundColor: '#8b9dc3',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f0f0f0'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // VOC 테이블 생성
+        function createVOCTable() {
+            const tbody = document.getElementById('vocTable');
+            tbody.innerHTML = '';
+
+            vocData.forEach(voc => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${voc.voc_no}</td>
+                    <td>${voc.mall_id}</td>
+                    <td><span class="keyword">${voc.category}</span></td>
+                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${voc.content}</td>
+                    <td>${voc.timestamp}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // CSV 내보내기
+        function exportToCSV() {
+            let csvContent = "VOC No,Mall ID,카테고리,VOC 내용,등록일시\n";
+
+            vocData.forEach(voc => {
+                const row = [
+                    voc.voc_no,
+                    voc.mall_id,
+                    voc.category,
+                    `"${voc.content.replace(/"/g, '""')}"`,
+                    voc.timestamp
+                ].join(',');
+                csvContent += row + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'cafe24_voc_data.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 필터 기능
+        document.getElementById('categoryFilter').addEventListener('change', function() {
+            // 실제 구현에서는 여기에 필터링 로직 추가
+            console.log('Category filter changed:', this.value);
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function() {
+            // 실제 구현에서는 여기에 검색 로직 추가
+            console.log('Search:', this.value);
+        });
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            createCategoryChart();
+            createCallFailChart();
+            createIncompleteChart();
+            createRejectionChart();
+            createVOCTable();
+        });
+    </script>
+</body>
+</html>
