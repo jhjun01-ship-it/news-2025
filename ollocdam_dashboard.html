@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>올록담 - [FGS]비즈니스성장팀 내부 검토</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 헤더 섹션 */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .brand-title {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6c757d;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .publish-date {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .email-alert {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(255, 183, 77, 0.3);
+        }
+
+        .email-alert-text {
+            color: #2d3436;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .basic-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+
+        /* 핵심 메시지 섹션 */
+        .key-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+            text-align: center;
+        }
+
+        .message-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .message-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 선정 이유 & 강점 */
+        .selection-strengths {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .strengths-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .strength-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .strength-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .strength-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            z-index: 1;
+        }
+
+        .strength-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .strength-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .strength-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .strength-reason {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .strength-data {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        /* 최신 성과 데이터 */
+        .latest-performance {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .performance-period {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .metric-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .metric-change {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .ai-insights {
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .insights-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .insight-item {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .insight-content {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            opacity: 0.95;
+        }
+
+        /* 브랜드 상세 정보 */
+        .brand-details {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .brands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .brand-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 6px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .brand-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .brand-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .brand-category {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .brand-links {
+            margin-top: 15px;
+        }
+
+        .brand-link {
+            display: block;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin: 8px 0;
+            padding: 8px 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .brand-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateX(5px);
+        }
+
+        .main-brand {
+            border-left-color: #dc3545;
+        }
+
+        .main-brand .brand-name {
+            color: #dc3545;
+        }
+
+        /* 영업/마케팅 포인트 */
+        .business-points {
+            background: linear-gradient(135deg, #00cec9 0%, #55a3ff 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(0, 206, 201, 0.3);
+        }
+
+        .points-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .point-item {
+            background: rgba(255,255,255,0.15);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .point-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .point-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .point-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        /* 팀 액션 플랜 */
+        .next-steps {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(253, 121, 168, 0.3);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .step-item {
+            background: rgba(255,255,255,0.15);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .step-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .step-number {
+            background: rgba(255,255,255,0.3);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .step-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        /* 푸터 */
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .brand-title {
+                font-size: 2.5rem;
+            }
+
+            .strengths-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .brands-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .points-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1 class="brand-title">올록담 (OLLOCDAM)</h1>
+            <p class="subtitle">[FGS]비즈니스성장팀 내부 검토</p>
+            <p class="publish-date">📅 2025-09-23 (화)</p>
+
+            <div class="email-alert">
+                <div class="email-alert-text">
+                    ⚠️ 대표 문의 메일 확인 필요: PRO 신청 당일 팀 메일로 해외진출 상담 요청 접수됨
+                </div>
+            </div>
+
+            <div class="basic-info">
+                <div class="info-item">
+                    <div class="info-label">대표자</div>
+                    <div class="info-value">변진석</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">몰ID</div>
+                    <div class="info-value">samsin981</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">사이트</div>
+                    <div class="info-value">ollocdam.com</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">산업군</div>
+                    <div class="info-value">건강식품</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">운영브랜드</div>
+                    <div class="info-value">4개</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">PRO 신청일</div>
+                    <div class="info-value">2025-08-05</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 핵심 메시지 -->
+        <div class="key-message">
+            <h2 class="message-title">🎯 핵심 메시지</h2>
+            <div class="message-content">
+                <strong>성과가 입증된 고객의 PRO 활용 사례</strong>를 통해 영업/마케팅 레퍼런스를 확보하고,
+                <strong>해외진출 지원을 통한 추가 성장</strong>을 도모하여
+                <strong>다른 브랜드들의 성공 모델</strong>로 활용할 수 있는 전략적 파트너십 구축 기회
+            </div>
+        </div>
+
+        <!-- 최신 성과 데이터 -->
+        <div class="latest-performance">
+            <h2 class="section-title">📊 최신 성과 데이터</h2>
+
+            <div class="performance-period">
+                📈 2025-09-15 ~ 2025-09-21 (최신 주간 데이터)
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">7.6억원</div>
+                    <div class="metric-label">주간 매출</div>
+                    <div class="metric-change">+12.5% ↗️</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4,503건</div>
+                    <div class="metric-label">총 주문수</div>
+                    <div class="metric-change">+9.8% ↗️</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">169,554원</div>
+                    <div class="metric-label">평균 주문금액</div>
+                    <div class="metric-change">프리미엄 포지셔닝</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.6%</div>
+                    <div class="metric-label">구매 전환율</div>
+                    <div class="metric-change">+50% ↗️</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">43.9%</div>
+                    <div class="metric-label">재방문율</div>
+                    <div class="metric-change">-1.6% ↘️</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">14.2%</div>
+                    <div class="metric-label">재구매율</div>
+                    <div class="metric-change">고객 충성도 높음</div>
+                </div>
+            </div>
+
+            <div class="ai-insights">
+                <h3 class="insights-title">🤖 AI 인사이트</h3>
+                <div class="insights-grid">
+                    <div class="insight-item">
+                        <div class="insight-title">매출 분석</div>
+                        <div class="insight-content">총 매출 763,500,509원, D2C 매출이 100% 차지. 평균 주문금액 169,554원으로 프리미엄 포지셔닝 성공</div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-title">전환율 분석</div>
+                        <div class="insight-content">751,913명 방문자 중 4,423명 구매 완료. 전체 전환율 0.6%로 지속 상승세</div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-title">고객 행동 분석</div>
+                        <div class="insight-content">전체 50,508명 회원 중 5,882명(11.6%)이 활성회원. 신규 가입자 4,238명(8.4%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 선정 이유 & 강점 -->
+        <div class="selection-strengths">
+            <h2 class="section-title">🎯 선정 이유 & 핵심 강점</h2>
+            <div class="strengths-grid">
+                <div class="strength-card">
+                    <div class="strength-content">
+                        <div class="strength-icon">🚀</div>
+                        <h3 class="strength-title">PRO 적극 활용</h3>
+                        <div class="strength-reason">
+                            PRO 신청 당일부터 대표가 직접 해외진출 상담을 요청할 만큼 높은 관심도와 적극적 활용 의지를 보임
+                        </div>
+                        <div class="strength-data">
+                            신청일 당일 해외진출 상담 메일 발송<br>
+                            광고 효율 저하 시 직접 문의<br>
+                            3개 쇼핑몰 PRO 동시 운영
+                        </div>
+                    </div>
+                </div>
+
+                <div class="strength-card">
+                    <div class="strength-content">
+                        <div class="strength-icon">💰</div>
+                        <h3 class="strength-title">검증된 강력한 성과</h3>
+                        <div class="strength-reason">
+                            프리미엄 건강식품으로 높은 객단가와 안정적인 매출 구조를 갖춘 성공적인 비즈니스 모델
+                        </div>
+                        <div class="strength-data">
+                            주간 매출: 7.6억원 (+12.5%)<br>
+                            평균 주문금액: 169,554원<br>
+                            재구매율: 14.2%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="strength-card">
+                    <div class="strength-content">
+                        <div class="strength-icon">🌍</div>
+                        <h3 class="strength-title">글로벌 확장 실행력</h3>
+                        <div class="strength-reason">
+                            대만, 홍콩, 일본 타겟으로 명확한 해외진출 계획과 다국어 쇼핑몰 구축을 통한 실행력 보유
+                        </div>
+                        <div class="strength-data">
+                            국내몰 PRO: 2025-08-05<br>
+                            영문몰 PRO: 2025-08-07<br>
+                            일문몰 PRO: 2025-08-07<br>
+                            타겟: 대만, 홍콩, 일본
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 운영 브랜드 상세 정보 -->
+        <div class="brand-details">
+            <h2 class="section-title">🏪 운영 브랜드 포트폴리오</h2>
+            <div class="brands-grid">
+                <div class="brand-card main-brand">
+                    <h3 class="brand-name">올록담 (OLLOCDAM)</h3>
+                    <div class="brand-category">건강식품 (프리미엄 올리브 오일)</div>
+                    <div style="font-size: 0.9rem; color: #6c757d; margin: 10px 0;">
+                        몰ID: samsin981 | 메인 PRO 활용 브랜드
+                    </div>
+                    <div class="brand-links">
+                        <a href="https://ollocdam.com/" target="_blank" class="brand-link">🌐 메인 사이트</a>
+                        <a href="https://samsin981.cafe24.com/shop1" target="_blank" class="brand-link">
+                            🛒 Shop1 (국내몰) <span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; margin-left: 5px;">PRO</span>
+                            <div style="font-size: 0.75rem; color: #6c757d; margin-top: 3px;">서비스 시작: 2025-08-05</div>
+                        </a>
+                        <a href="https://www.youtube.com/channel/UC4BKuD7BI7voVN5AGkl0VuA/store" target="_blank" class="brand-link">📺 유튜브쇼핑</a>
+                        <a href="https://samsin981.cafe24.com/shop3" target="_blank" class="brand-link">
+                            🌍 영문몰 <span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; margin-left: 5px;">PRO</span>
+                            <div style="font-size: 0.75rem; color: #6c757d; margin-top: 3px;">서비스 시작: 2025-08-07</div>
+                        </a>
+                        <a href="https://samsin981.cafe24.com/shop4" target="_blank" class="brand-link">
+                            🌏 일문몰 <span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; margin-left: 5px;">PRO</span>
+                            <div style="font-size: 0.75rem; color: #6c757d; margin-top: 3px;">서비스 시작: 2025-08-07</div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="brand-card">
+                    <h3 class="brand-name">젠비아 (XENVIA)</h3>
+                    <div class="brand-category">다이어트 식품</div>
+                    <div style="font-size: 0.9rem; color: #6c757d; margin: 10px 0;">
+                        몰ID: samsin98 | SNS·구독 기반
+                    </div>
+                    <div class="brand-links">
+                        <a href="https://xenvia.co.kr/" target="_blank" class="brand-link">🌐 메인 사이트</a>
+                        <a href="https://www.instagram.com/xenvia_tm/" target="_blank" class="brand-link">📸 인스타그램</a>
+                    </div>
+                </div>
+
+                <div class="brand-card">
+                    <h3 class="brand-name">오베뮨 (OBEMMUN)</h3>
+                    <div class="brand-category">건강 간편식·스무디</div>
+                    <div style="font-size: 0.9rem; color: #6c757d; margin: 10px 0;">
+                        몰ID: samsin982 | 다이어트식품, 건강보조제
+                    </div>
+                    <div class="brand-links">
+                        <a href="https://www.obemmun.com/" target="_blank" class="brand-link">🌐 메인 사이트</a>
+                    </div>
+                </div>
+
+                <div class="brand-card">
+                    <h3 class="brand-name">파노티 (PANOTTI)</h3>
+                    <div class="brand-category">스모키 페어링 키트</div>
+                    <div style="font-size: 0.9rem; color: #6c757d; margin: 10px 0;">
+                        몰ID: panotti | 훈연 향 페어링 키트와 우드칩 전문몰
+                    </div>
+                    <div class="brand-links">
+                        <a href="https://panotti.co.kr/index.html" target="_blank" class="brand-link">🌐 메인 사이트</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 영업/마케팅 포인트 -->
+        <div class="business-points">
+            <h2 class="section-title" style="color: white; border-bottom-color: rgba(255,255,255,0.3);">🎯 영업/마케팅 활용 포인트</h2>
+            <div class="points-grid">
+                <div class="point-item">
+                    <div class="point-icon">📈</div>
+                    <h3 class="point-title">레퍼런스 활용가치</h3>
+                    <div class="point-content">
+                        • 주간 7.6억원 매출의 검증된 성과<br>
+                        • PRO 3개 쇼핑몰 동시 운영 사례<br>
+                        • 프리미엄 포지셔닝 성공 모델<br>
+                        • 영업 제안서 핵심 레퍼런스로 활용
+                    </div>
+                </div>
+
+                <div class="point-item">
+                    <div class="point-icon">🌍</div>
+                    <h3 class="point-title">글로벌 확장 스토리</h3>
+                    <div class="point-content">
+                        • 해외진출 의지가 명확한 적극적 고객<br>
+                        • 패스트박스 연계 통한 추가 매출 창출<br>
+                        • 글로벌 성공사례 구축 기회<br>
+                        • 해외진출 솔루션 영업에 적극 활용
+                    </div>
+                </div>
+
+                <div class="point-item">
+                    <div class="point-icon">🤝</div>
+                    <h3 class="point-title">파트너십 확장</h3>
+                    <div class="point-content">
+                        • 4개 브랜드 성공 확산 가능성<br>
+                        • 추가 PRO 서비스 확대 기회<br>
+                        • 장기적 전략 파트너로 육성<br>
+                        • 다른 건강식품 브랜드 유치에 활용
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 팀 액션 플랜 -->
+        <div class="next-steps">
+            <h2 class="section-title" style="color: white; border-bottom-color: rgba(255,255,255,0.3);">📋 [FGS]비즈니스성장팀 액션 플랜</h2>
+            <div class="steps-grid">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">성공사례 인터뷰 진행</h3>
+                    <div class="step-content">
+                        대표 변진석과 직접 인터뷰를 통해 PRO 활용 경험, 성과, 개선점을 상세히 수집하여 영업용 레퍼런스 스토리 작성.
+                        <strong>영업팀 제안서에 즉시 활용 가능한 구체적 수치와 성과 중심으로 정리</strong>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">패스트박스 연계 지원</h3>
+                    <div class="step-content">
+                        글로벌 확장 의지가 명확하므로 물류팀과 협업하여 패스트박스 계약 및 해외 배송 최적화 지원 진행.
+                        <strong>추가 매출 창출과 글로벌 성공사례 확보 동시 달성</strong>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">영업 레퍼런스 확산</h3>
+                    <div class="step-content">
+                        수집된 인터뷰 내용을 바탕으로 영업팀 활용 자료 제작.
+                        <strong>건강식품/프리미엄 브랜드 타겟 영업 시 핵심 레퍼런스로 활용하여 신규 고객 유치</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 푸터 -->
+        <div class="footer">
+            <p>🏢 [FGS]비즈니스성장팀 내부 검토 | 작성일: 2025-09-23 (화) | 올록담 성과 분석 리포트</p>
+        </div>
+    </div>
+</body>
+</html>
