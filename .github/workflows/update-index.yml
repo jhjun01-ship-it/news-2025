@@ -18,17 +18,7 @@ jobs:
           python-version: "3.x"
 
       - name: Generate index.html
-        run: |
-          echo "import os" > generate_index.py
-          echo "" >> generate_index.py
-          echo "files = [f for f in os.listdir('.') if f.endswith('.html') and f != 'index.html']" >> generate_index.py
-          echo "files.sort()" >> generate_index.py
-          echo "with open('index.html', 'w', encoding='utf-8') as f:" >> generate_index.py
-          echo "    f.write('<!DOCTYPE html><html><head><meta charset=\\\"UTF-8\\\"><title>Dashboard Index</title></head><body><h1>Dashboard Index</h1><ul>')" >> generate_index.py
-          echo "    for file in files:" >> generate_index.py
-          echo "        f.write(f'<li><a href={file}>{file}</a></li>')" >> generate_index.py
-          echo "    f.write('</ul></body></html>')" >> generate_index.py
-          python generate_index.py
+        run: python generate_index.py
 
       - name: Commit and push changes
         run: |
