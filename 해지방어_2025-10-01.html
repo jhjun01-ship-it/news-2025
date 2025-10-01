@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ 해지방어 현황 대시보드 | 2025-09-16 ~ 2025-09-30</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header .period {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .stat-card .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-card.danger .value {
+            color: #e74c3c;
+        }
+
+        .stat-card.warning .value {
+            color: #f39c12;
+        }
+
+        .stat-card.success .value {
+            color: #27ae60;
+        }
+
+        .stat-card.info .value {
+            color: #3498db;
+        }
+
+        .section {
+            padding: 40px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 30px 0;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .reason-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .reason-item {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reason-item .text {
+            flex: 1;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .reason-item .count {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-left: 15px;
+        }
+
+        .problem-card {
+            background: #fff5f5;
+            border-left: 4px solid #e74c3c;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .problem-card h3 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .problem-card ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        .problem-card li:before {
+            content: "⚠️ ";
+            margin-right: 8px;
+        }
+
+        .recommendation-card {
+            background: #f0f9ff;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .recommendation-card h3 {
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-card ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        .recommendation-card li:before {
+            content: "💡 ";
+            margin-right: 8px;
+        }
+
+        .high-value-customers {
+            background: #fffbf0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .high-value-customers h3 {
+            color: #f39c12;
+            margin-bottom: 15px;
+        }
+
+        .customer-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .customer-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .customer-item .name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .customer-item .revenue {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .customer-item .status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+        }
+
+        .customer-item .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .customer-item .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .badge.critical {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .badge.high {
+            background: #f39c12;
+            color: white;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+
+            .stat-card:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ 해지방어 현황 대시보드</h1>
+            <p class="period">분석 기간: 2025-09-16 ~ 2025-09-30</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card danger">
+                <div class="label">총 해지 요청</div>
+                <div class="value">445</div>
+            </div>
+
+            <div class="stat-card danger">
+                <div class="label">해지 완료</div>
+                <div class="value">312</div>
+            </div>
+
+            <div class="stat-card warning">
+                <div class="label">해지 대기 (Pending)</div>
+                <div class="value">103</div>
+            </div>
+
+            <div class="stat-card info">
+                <div class="label">심사중</div>
+                <div class="value">24</div>
+            </div>
+
+            <div class="stat-card success">
+                <div class="label">방어 성공</div>
+                <div class="value">6</div>
+            </div>
+
+            <div class="stat-card danger">
+                <div class="label">해지율</div>
+                <div class="value">70.1%</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">📊 서비스별 해지 현황</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <canvas id="serviceChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">🔥 주요 해지 사유 분석 <span class="badge critical">긴급</span></h2>
+            <div class="reason-list">
+                <div class="reason-item">
+                    <div class="text">서비스 불만족 - 원하는 서비스가 아님</div>
+                    <div class="count">142</div>
+                </div>
+                <div class="reason-item">
+                    <div class="text">잘못 신청 / 실수로 신청</div>
+                    <div class="count">67</div>
+                </div>
+                <div class="reason-item">
+                    <div class="text">동의 없는 자동 설정 / 사이트 변경</div>
+                    <div class="count">53</div>
+                </div>
+                <div class="reason-item">
+                    <div class="text">글로벌 서비스 불필요</div>
+                    <div class="count">48</div>
+                </div>
+                <div class="reason-item">
+                    <div class="text">서비스 준비 부족 / 회사 사정</div>
+                    <div class="count">38</div>
+                </div>
+                <div class="reason-item">
+                    <div class="text">사용 불편 / 복잡함</div>
+                    <div class="count">31</div>
+                </div>
+                <div class="reason-item">
+                    <div class="text">수수료 불만족</div>
+                    <div class="count">19</div>
+                </div>
+                <div class="reason-item">
+                    <div class="text">기타 사유</div>
+                    <div class="count">47</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">💰 고매출 고객 해지 현황 <span class="badge high">주의</span></h2>
+            <div class="high-value-customers">
+                <h3>월 매출 상위 해지 요청 고객</h3>
+                <div class="customer-list">
+                    <div class="customer-item">
+                        <span class="name">zenonpower2</span>
+                        <span class="revenue">₩43,972,692</span>
+                        <span class="status pending">해지 대기</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">hanwoo1081</span>
+                        <span class="revenue">₩39,178,897</span>
+                        <span class="status pending">해지 완료</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">iamprotein</span>
+                        <span class="revenue">₩6,335,882</span>
+                        <span class="status pending">해지 완료</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">todaysend</span>
+                        <span class="revenue">₩4,781,623</span>
+                        <span class="status pending">해지 완료</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">thesoga</span>
+                        <span class="revenue">₩3,754,300</span>
+                        <span class="status pending">해지 대기</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">wurzel9</span>
+                        <span class="revenue">₩2,727,590</span>
+                        <span class="status pending">심사중</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">iammacho097</span>
+                        <span class="revenue">₩1,893,040</span>
+                        <span class="status pending">해지 완료</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">yeonluv</span>
+                        <span class="revenue">₩1,353,535</span>
+                        <span class="status pending">해지 완료</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">iloveberry</span>
+                        <span class="revenue">₩1,221,525</span>
+                        <span class="status pending">해지 완료</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">bachajasu</span>
+                        <span class="revenue">₩1,210,900</span>
+                        <span class="status pending">심사중</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">sbgn3949</span>
+                        <span class="revenue">₩1,198,680</span>
+                        <span class="status pending">해지 완료</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">cellmute</span>
+                        <span class="revenue">₩937,984</span>
+                        <span class="status pending">해지 완료</span>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 30px; color: #27ae60;">✅ 방어 성공 사례</h3>
+                <div class="customer-list">
+                    <div class="customer-item">
+                        <span class="name">pcis</span>
+                        <span class="revenue">₩3,411,050</span>
+                        <span class="status success">방어 성공</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">yyd03218</span>
+                        <span class="revenue">₩358,240</span>
+                        <span class="status success">방어 성공</span>
+                    </div>
+                    <div class="customer-item">
+                        <span class="name">ggomzirak11</span>
+                        <span class="revenue">₩178,050</span>
+                        <span class="status success">방어 성공</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">📈 일별 해지 요청 추이</h2>
+            <div class="chart-container">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">⚠️ 주요 문제점</h2>
+
+            <div class="problem-card">
+                <h3>1. 사용자 동의 없는 자동 설정 (53건)</h3>
+                <ul>
+                    <li>원치 않는 팝업, 배너, 상품 진열 자동 변경</li>
+                    <li>사전 동의 없는 사이트 수정</li>
+                    <li>"동의 없이 바뀌는 사이트", "마음대로 사이트가 변경됨"</li>
+                </ul>
+            </div>
+
+            <div class="problem-card">
+                <h3>2. UX/UI 문제 (67건)</h3>
+                <ul>
+                    <li>서비스 이해도 부족 - 무엇을 제공하는 서비스인지 불명확</li>
+                    <li>"신청하기" 버튼 클릭 시 확인 없이 즉시 신청 완료</li>
+                    <li>복잡하고 어려운 인터페이스</li>
+                </ul>
+            </div>
+
+            <div class="problem-card">
+                <h3>3. 커뮤니케이션 부재 (31건)</h3>
+                <ul>
+                    <li>전화 상담 연결 어려움</li>
+                    <li>피드백 처리 지연 - "질문 처리 기간이 너무 느림"</li>
+                    <li>서비스 설명 및 안내 부족</li>
+                </ul>
+            </div>
+
+            <div class="problem-card">
+                <h3>4. 기술적 문제</h3>
+                <ul>
+                    <li>사이트 충돌 및 오류 다수 발생</li>
+                    <li>기존 디자인 사용 불가</li>
+                    <li>플랫폼 호환성 문제 (네이버페이 버튼 미노출 등)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">💡 개선 방안</h2>
+
+            <div class="recommendation-card">
+                <h3>즉시 조치 필요 (Critical)</h3>
+                <ul>
+                    <li>사용자 동의 프로세스 강화 - 모든 변경사항에 대한 명시적 동의 필요</li>
+                    <li>신청 전 확인 단계 추가 - "정말 신청하시겠습니까?" 확인 팝업</li>
+                    <li>자동 설정 기능 재검토 - 옵트인(Opt-in) 방식으로 전환</li>
+                    <li>되돌리기(Rollback) 기능 추가 - 변경사항 원상복구 가능하도록</li>
+                </ul>
+            </div>
+
+            <div class="recommendation-card">
+                <h3>고객 지원 개선 (High Priority)</h3>
+                <ul>
+                    <li>상담 응대 시간 단축 - 전화 상담 대기 시간 최소화</li>
+                    <li>온보딩 프로세스 개선 - 서비스 신청 전 튜토리얼 제공</li>
+                    <li>서비스 가이드 강화 - FAQ, 동영상 가이드 확충</li>
+                    <li>고매출 고객 전담 매니저 배정</li>
+                </ul>
+            </div>
+
+            <div class="recommendation-card">
+                <h3>서비스 개선 (Medium Priority)</h3>
+                <ul>
+                    <li>사용자 맞춤 설정 옵션 제공 - 원하는 기능만 선택 가능</li>
+                    <li>단계별 서비스 적용 옵션 - 점진적 기능 활성화</li>
+                    <li>글로벌/국내 서비스 분리 옵션 명확화</li>
+                    <li>기술적 오류 모니터링 및 즉시 대응 체계 구축</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📅 리포트 생성일: 2025-10-01</p>
+            <p>© 2025 Cafe24 해지방어팀. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // 서비스별 해지 현황
+        const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+        new Chart(serviceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['국내 서비스', '글로벌 서비스'],
+                datasets: [{
+                    data: [215, 230],
+                    backgroundColor: [
+                        '#3498db',
+                        '#9b59b6'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 14
+                            },
+                            padding: 20
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: '서비스 유형별 해지 요청',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: 20
+                    }
+                }
+            }
+        });
+
+        // 상태별 현황
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: ['해지 완료', '해지 대기 (Pending)', '심사중', '방어 성공'],
+                datasets: [{
+                    data: [312, 103, 24, 6],
+                    backgroundColor: [
+                        '#e74c3c',
+                        '#f39c12',
+                        '#3498db',
+                        '#27ae60'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 14
+                            },
+                            padding: 20
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: '상태별 현황',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: 20
+                    }
+                }
+            }
+        });
+
+        // 일별 추이
+        const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+        new Chart(dailyCtx, {
+            type: 'line',
+            data: {
+                labels: ['09/16', '09/17', '09/18', '09/19', '09/22', '09/23', '09/24', '09/25', '09/26', '09/27', '09/28', '09/29', '09/30'],
+                datasets: [{
+                    label: '일별 해지 요청',
+                    data: [1, 42, 38, 27, 24, 51, 48, 56, 38, 15, 8, 31, 66],
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#e74c3c',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: '일별 해지 요청 추이',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: 20
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 10
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
